@@ -31,3 +31,4 @@
 *.out
 *.app
 BTree
+test_class_map

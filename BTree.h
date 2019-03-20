@@ -12,7 +12,7 @@ public:
     bool insert(const KeyValue<K,V>);
     bool erase(K); //删除
     void printTree();
-    KeyValue<K,V> *find(K key);
+    KeyValue<K,V> *find(K key); //if not find return NULL
     void clear();
     int size();
     ~BTreeMap();

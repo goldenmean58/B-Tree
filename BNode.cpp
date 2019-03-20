@@ -12,7 +12,7 @@ bool BNode<K,V>::isLeaf(){
 }
 
 template<class K, class V>
-V BNode<K,V>::getValueOfKey(K key){
+V& BNode<K,V>::getValueOfKey(K key){
     typename std::list<K>::iterator it_key=this->keys.begin();
     typename std::list<V>::iterator it_data=this->datas.begin();
     for(;it_key!=this->keys.end();it_key++,it_data++){
@@ -20,7 +20,6 @@ V BNode<K,V>::getValueOfKey(K key){
             return *it_data;
         }
     }
-    return NULL;
 }
 
 template<class K, class V>

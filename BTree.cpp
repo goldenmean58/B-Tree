@@ -88,7 +88,6 @@ bool BTreeMap<K,V>::_erase(BNode<K,V> *root, K key){
         V candidateData;
         //找直接前驱替换并删除直接前驱
         BNode<K,V> *leftSubNode=keyNode->getPreNode(key);
-        int tmp=keyNode->childNode.size();
         subTree=leftSubNode;
         while(!subTree->isLeaf()){
             subTree=subTree->childNode.back();

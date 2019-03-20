@@ -19,13 +19,9 @@ template<class K, class V>
 class KeyValue{
 public:
     K key;
-    V value;
-    KeyValue(K key,V value):key(key),value(value){}
+    V &value;
+    KeyValue(K key,V &value):key(key),value(value){}
     KeyValue();
-    void operator = (const KeyValue<K,V> &kv){
-        key=kv.key;
-        value=kv.value;
-    }
 };
 
 template<class K, class V>
@@ -38,7 +34,7 @@ public:
     BNode(BNode<K,V>*);
     bool isHasKey(K); //是否有key
     bool isLeaf(); //是否为叶结点
-    V getValueOfKey(K); //取key的数据
+    V& getValueOfKey(K); //取key的数据
     BNode<K,V> *getPreNode(K); //取关键字的左子结点
     BNode<K,V> *getNextNode(K); //取关键字的右子结点
     bool setPreNode(K, BNode<K,V>*); //设置关键字的左子结点
