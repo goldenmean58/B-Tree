@@ -299,12 +299,11 @@ void BTreeMap<K,V>::_splitNode(BNode<K,V> *node){
 template<class K, class V>
 void BTreeMap<K,V>::_printTree(BNode<K,V> *root){
     if(!root) return;
-    set<BNode<K,V>* >subTree;
+    //set<BNode<K,V>* >subTree;
     queue<BNode<K,V>* >visitQueue;
     int oldSubTreeNum=1, newSubTreeNum=0;
     BNode<K,V> *p=NULL;
     visitQueue.push(root);
-    subTree.insert(root);
     auto pre=p;
     while(!visitQueue.empty()){
         pre=p;
@@ -318,11 +317,8 @@ void BTreeMap<K,V>::_printTree(BNode<K,V> *root){
         visitQueue.pop();
         if(!p->isLeaf()){
             for(auto it_child:p->childNode){
-                if(subTree.find(it_child)==subTree.end() && it_child!=NULL){
-                    newSubTreeNum++;
-                    visitQueue.push(it_child);
-                    subTree.insert(it_child);
-                }
+                newSubTreeNum++;
+                visitQueue.push(it_child);
             }
         }
         oldSubTreeNum--;

@@ -4,7 +4,6 @@
 #include<iostream>
 #include<list>
 #include<queue>
-#include<set>
 #include<math.h>
 #include<vector>
 using std::cin;
@@ -12,7 +11,6 @@ using std::cout;
 using std::endl;
 using std::list;
 using std::queue;
-using std::set;
 using std::vector;
 
 template<class K, class V>
