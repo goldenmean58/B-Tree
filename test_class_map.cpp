@@ -46,7 +46,7 @@ int main()
                 cout<<"age:"; 
                 cin>>age;
                 tc=new TestClass(key,name,age);
-                if(bt.insert(key,*tc)){
+                if(bt.insert(key,*tc)){ // will insert a copy of *tc
                     cout<<"ok"<<endl;
                 }
                 delete tc;
@@ -64,7 +64,8 @@ int main()
                 kv=bt.find(key);
                 if(kv){
                     kv->value.print();
-                    kv->value.age=100;
+                    kv->value.age=100; // modifying reference affects value in btree
+                    kv->value.print();
                 }else{
                     cout<<"No such a person"<<endl;
                 }
