@@ -58,7 +58,7 @@ bool BTreeMap<K,V>::insert(BNode<K,V> *root, K key, V value){
         }
     }
     if(root->isLeaf()){
-        root->insert(key,value);
+        root->create(key,value);
         _splitNode(root);
         return true;
     }else{
@@ -78,7 +78,7 @@ bool BTreeMap<K,V>::_erase(BNode<K,V> *root, K key){
     BNode<K,V> *keyNode=_find(root,key);
     if(keyNode==NULL) return false;
     if(keyNode->isLeaf()){ //leaf node
-        keyNode->removeKey(key); //直接移除
+        keyNode->removeKeyAndLeftChild(key); //直接移除
         //检测delete后是否下溢
         if(keyNode->keys.size()<ceil(_M/2.0)-1)
             _reBalance(keyNode);
@@ -88,6 +88,7 @@ bool BTreeMap<K,V>::_erase(BNode<K,V> *root, K key){
         V candidateData;
         //找直接前驱替换并删除直接前驱
         BNode<K,V> *leftSubNode=keyNode->getPreNode(key);
+        int tmp=keyNode->childNode.size();
         subTree=leftSubNode;
         while(!subTree->isLeaf()){
             subTree=subTree->childNode.back();
@@ -95,7 +96,7 @@ bool BTreeMap<K,V>::_erase(BNode<K,V> *root, K key){
         candidateKey=subTree->keys.back();
         candidateData=subTree->getValueOfKey(candidateKey);
         keyNode->replace(key,candidateKey,candidateData);
-        subTree->removeKey(candidateKey);
+        subTree->removeKeyAndLeftChild(candidateKey);
         //上面一步可能会导致子树结点的下溢
         if(subTree->keys.size()<ceil(_M/2.0)-1)
             _reBalance(subTree);
@@ -146,19 +147,27 @@ void BTreeMap<K,V>::_reBalance(BNode<K,V> *node){
     K parentKey;
     V parentData;
     if(rightSiblingNode!=NULL && rightSiblingNode->keys.size()>ceil(_M/2.0)-1){
+        //borrow from right sibling
         parentKey=node->getRightParentKey();
         parentData=node->parentNode->getValueOfKey(parentKey);
         siblingNode=rightSiblingNode;
         node->insert(parentKey,parentData);
         node->parentNode->replace(parentKey,siblingNode->keys.front(),siblingNode->datas.front());
-        siblingNode->removeKey(siblingNode->keys.front());
+        node->childNode.insert(node->childNode.end(),siblingNode->childNode.front());
+        if(siblingNode->childNode.back()!=NULL) // reset child's parent
+            siblingNode->childNode.front()->parentNode=node;
+        siblingNode->removeKeyAndLeftChild(siblingNode->keys.front());
     }else if(leftSiblingNode!=NULL && leftSiblingNode->keys.size()>ceil(_M/2.0)-1){
+        //borrow from left sibling
         parentKey=node->getLeftParentKey();
         parentData=node->parentNode->getValueOfKey(parentKey);
         siblingNode=leftSiblingNode;
         node->insert(parentKey,parentData);
         node->parentNode->replace(parentKey,siblingNode->keys.back(),siblingNode->datas.back());
-        siblingNode->removeKey(siblingNode->keys.back());
+        node->childNode.insert(node->childNode.begin(),siblingNode->childNode.back());
+        if(siblingNode->childNode.back()!=NULL)
+            siblingNode->childNode.back()->parentNode=node;
+        siblingNode->removeKeyAndRightChild(siblingNode->keys.back());
     }else{
         //merge
         //move sep to the end of the left node and move all elements in the right node into the left node
@@ -176,15 +185,13 @@ void BTreeMap<K,V>::_reBalance(BNode<K,V> *node){
             leftSiblingNode->datas.insert(leftSiblingNode->datas.end(),node->datas.begin(),node->datas.end());
             leftSiblingNode->childNode.insert(leftSiblingNode->childNode.end(),node->childNode.begin(),node->childNode.end());
             //remove the sep from the parent node and the empty right node
-            parentNode->removeKey(node->getLeftParentKey());
-            typename std::list<BNode<K,V>*>::iterator it_child = parentNode->childNode.begin();
-            for(;it_child!=parentNode->childNode.end();it_child++){
-                if(*it_child==node){
-                    parentNode->childNode.erase(it_child);
-                    break;
-                }
-            }
+            parentNode->removeKeyAndRightChild(node->getLeftParentKey());
             newRoot=leftSiblingNode;
+            //reset children's parentNode to the new node
+            for(auto child:newRoot->childNode){
+                if(child!=NULL)
+                    child->parentNode=newRoot;
+            }
             delete node;
         }else{
             //合并node,右兄弟结点与parent sep
@@ -193,20 +200,18 @@ void BTreeMap<K,V>::_reBalance(BNode<K,V> *node){
             node->keys.insert(node->keys.end(),rightSiblingNode->keys.begin(),rightSiblingNode->keys.end());
             node->datas.insert(node->datas.end(),rightSiblingNode->datas.begin(),rightSiblingNode->datas.end());
             node->childNode.insert(node->childNode.end(),rightSiblingNode->childNode.begin(),rightSiblingNode->childNode.end());
-            parentNode->removeKey(node->getRightParentKey());
-            typename std::list<BNode<K,V>*>::iterator it_child = parentNode->childNode.begin();
-            for(;it_child!=parentNode->childNode.end();it_child++){
-                if(*it_child==rightSiblingNode){
-                    parentNode->childNode.erase(it_child);
-                    break;
-                }
-            }
+            parentNode->removeKeyAndRightChild(node->getRightParentKey());
             newRoot=node;
+            for(auto child:newRoot->childNode){
+                if(child!=NULL)
+                   child->parentNode=newRoot;
+            }
             delete rightSiblingNode;
         }
-        if(parentNode==_root &&  parentNode->keys.size()==0){
+        if(parentNode==_root &&  parentNode->keys.size()==0){ //根为空则合并结点作为新根
             delete _root;
             _root=newRoot;
+            _root->parentNode=NULL;
             return;
         }
         if(parentNode->keys.size()<ceil(_M/2.0)-1)
@@ -268,7 +273,7 @@ void BTreeMap<K,V>::_splitNode(BNode<K,V> *node){
         it_child_sep++;
     }
     //提sep到父结点
-    node->parentNode->insert(*it_key_sep,*it_data_sep);
+    node->parentNode->create(*it_key_sep,*it_data_sep);
     //重新设置父结点的孩子结点
     node->parentNode->setPreNode(*it_key_sep,pNewNodeA);
     node->parentNode->setNextNode(*it_key_sep,pNewNodeB);
@@ -287,7 +292,9 @@ void BTreeMap<K,V>::_printTree(BNode<K,V> *root){
     BNode<K,V> *p=NULL;
     visitQueue.push(root);
     subTree.insert(root);
+    auto pre=p;
     while(!visitQueue.empty()){
+        pre=p;
         p=visitQueue.front();
         //print a node's keys
         cout<<"| ";
@@ -298,7 +305,7 @@ void BTreeMap<K,V>::_printTree(BNode<K,V> *root){
         visitQueue.pop();
         if(!p->isLeaf()){
             for(auto it_child:p->childNode){
-                if(subTree.find(it_child)==subTree.end()){
+                if(subTree.find(it_child)==subTree.end() && it_child!=NULL){
                     newSubTreeNum++;
                     visitQueue.push(it_child);
                     subTree.insert(it_child);

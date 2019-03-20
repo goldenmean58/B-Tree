@@ -7,6 +7,7 @@ bool BNode<K,V>::isHasKey(K){
 
 template<class K, class V>
 bool BNode<K,V>::isLeaf(){
+    if(this->childNode.size()==0) return true;
     return this->childNode.front()==NULL;
 }
 
@@ -29,6 +30,21 @@ BNode<K,V>::BNode(BNode<K,V> * parentNode):parentNode(parentNode){
 
 template<class K, class V>
 void BNode<K,V>::insert(K key, V value){ //结点插入kv
+    typename std::list<K>::iterator it_key=this->keys.begin();
+    typename std::list<V>::iterator it_data=this->datas.begin();
+    typename std::list<BNode<K,V>*>::iterator it_child=this->childNode.begin();
+    for(;it_key!=this->keys.end();it_key++,it_data++,it_child++){
+        if(*it_key>key){
+            break;
+        }
+    }
+    keys.insert(it_key,key);
+    datas.insert(it_data,value);
+}
+
+
+template<class K, class V>
+void BNode<K,V>::create(K key, V value){ //结点插入kv
     typename std::list<K>::iterator it_key=this->keys.begin();
     typename std::list<V>::iterator it_data=this->datas.begin();
     typename std::list<BNode<K,V>*>::iterator it_child=this->childNode.begin();
@@ -105,8 +121,8 @@ bool BNode<K,V>::setNextNode(K key, BNode<K,V> *newSubNode){
 }
 
 template<class K, class V>
-bool BNode<K,V>::removeKey(K key){
-    //移除结点key data child
+bool BNode<K,V>::removeKeyAndLeftChild(K key){
+    //移除结点key data 以及childNode中对应的左孩子
     typename std::list<K>::iterator it_key=this->keys.begin();
     typename std::list<V>::iterator it_data=this->datas.begin();
     typename std::list<BNode<K,V>*>::iterator it_child=this->childNode.begin();
@@ -114,9 +130,25 @@ bool BNode<K,V>::removeKey(K key){
         if(*it_key==key){
             this->keys.erase(it_key);
             this->datas.erase(it_data);
-            if(this->isLeaf()){
-                it_child=this->childNode.erase(it_child);
-            }
+            this->childNode.erase(it_child);
+            return true;
+        }
+    }
+    return false;
+}
+
+template<class K, class V>
+bool BNode<K,V>::removeKeyAndRightChild(K key){
+    //移除结点key data 以及childNode中对应的左孩子
+    typename std::list<K>::iterator it_key=this->keys.begin();
+    typename std::list<V>::iterator it_data=this->datas.begin();
+    typename std::list<BNode<K,V>*>::iterator it_child=this->childNode.begin();
+    for(;it_key!=this->keys.end();it_key++,it_data++,it_child++){
+        if(*it_key==key){
+            this->keys.erase(it_key);
+            this->datas.erase(it_data);
+            it_child++;
+            this->childNode.erase(it_child);
             return true;
         }
     }
@@ -156,6 +188,7 @@ BNode<K,V>* BNode<K,V>::getRightSibling(){
 template<class K, class V>
 BNode<K,V> *BNode<K,V>::getLeftSibling(){
     if(this->parentNode==NULL) return NULL;
+    if(*(this->parentNode->childNode.begin())==this) return NULL;
     typename std::list<BNode<K,V>*>::iterator it_child=this->parentNode->childNode.begin();
     for(;it_child!=this->parentNode->childNode.end();it_child++){
         if(*it_child==this){

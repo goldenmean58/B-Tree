@@ -6,12 +6,14 @@
 #include<queue>
 #include<set>
 #include<math.h>
+#include<vector>
 using std::cin;
 using std::cout;
 using std::endl;
 using std::list;
 using std::queue;
 using std::set;
+using std::vector;
 
 template<class K, class V>
 class KeyValue{
@@ -41,8 +43,10 @@ public:
     BNode<K,V> *getNextNode(K); //取关键字的右子结点
     bool setPreNode(K, BNode<K,V>*); //设置关键字的左子结点
     bool setNextNode(K, BNode<K,V>*); //设置关键字的右子结点
-    void insert(K key,V value); //在当前结点插入key与value 返回是否需要分裂结点
-    bool removeKey(K key);
+    void insert(K key,V value); //在当前结点插入key与value
+    void create(K key,V value); //在当前结点插入key,value与对应位置生成新NULL->childNode
+    bool removeKeyAndLeftChild(K key);
+    bool removeKeyAndRightChild(K key);
     bool replace(K,K,V);
     BNode<K,V> *getRightSibling();
     BNode<K,V> *getLeftSibling();
