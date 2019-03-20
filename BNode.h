@@ -32,7 +32,6 @@ public:
     list<BNode<K,V>*> childNode; //结点内孩子结点指针
     BNode<K,V> *parentNode; //父结点
     BNode(BNode<K,V>*);
-    bool isHasKey(K); //是否有key
     bool isLeaf(); //是否为叶结点
     V& getValueOfKey(K); //取key的数据
     BNode<K,V> *getPreNode(K); //取关键字的左子结点

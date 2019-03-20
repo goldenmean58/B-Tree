@@ -15,12 +15,10 @@ int main(void)
     vector<int> keys;
     KeyValue<int,int> *kv;
     unsigned int seed=0;
+    cout<<"Please enter the random seed(0 for random):";
     cin>>seed;
     if(seed==0)
         seed=(unsigned int)time(NULL);
-    //key==0x168
-    //getRightSibling return NULL
-    //node->parentNode only has one key but four children
     srand(seed);
     cout<<"Current Seed: "<<seed<<endl;
     cout<<"1.Insert key and data."<<endl;

@@ -60,6 +60,7 @@ bool BTreeMap<K,V>::insert(BNode<K,V> *root, K key, V value){
     if(root->isLeaf()){
         root->create(key,value);
         _splitNode(root);
+        _size++;
         return true;
     }else{
         return insert(*it_child,key,value);
@@ -100,6 +101,7 @@ bool BTreeMap<K,V>::_erase(BNode<K,V> *root, K key){
         if(subTree->keys.size()<ceil(_M/2.0)-1)
             _reBalance(subTree);
     }
+    _size--;
     return true;
 }
 
@@ -127,12 +129,23 @@ BNode<K,V> *BTreeMap<K,V>::_find(BNode<K,V> *root, K key){
 }
 
 template<class K, class V>
-BTreeMap<K,V>::~BTreeMap(){
+void BTreeMap<K,V>::_removeTree(BNode<K,V>* root){
+    if(!root) return;
+    if(root->isLeaf()){
+        delete root;
+        return;
+    } 
+    typename std::list<BNode<K,V>*>::iterator it_child = root->childNode.begin();
+    for(;it_child!=root->childNode.end();it_child++){
+        _removeTree(*it_child);
+        *it_child=NULL;
+    }
+    delete root;
 }
 
 template<class K, class V>
-void BTreeMap<K,V>::_mergeNode(BNode<K,V> *node){
-
+BTreeMap<K,V>::~BTreeMap(){
+    _removeTree(_root);
 }
 
 template<class K, class V>
@@ -220,7 +233,8 @@ void BTreeMap<K,V>::_reBalance(BNode<K,V> *node){
 
 template<class K, class V>
 void BTreeMap<K,V>::_removeNode(BNode<K,V> *node){
-    //递归removeNode
+    if(node)
+        delete node;
     return;
 }
 

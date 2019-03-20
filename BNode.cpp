@@ -1,11 +1,6 @@
 #include "BNode.h"
 
 template<class K, class V>
-bool BNode<K,V>::isHasKey(K){
-    return true;
-}
-
-template<class K, class V>
 bool BNode<K,V>::isLeaf(){
     if(this->childNode.size()==0) return true;
     return this->childNode.front()==NULL;
@@ -23,9 +18,7 @@ V& BNode<K,V>::getValueOfKey(K key){
 }
 
 template<class K, class V>
-BNode<K,V>::BNode(BNode<K,V> * parentNode):parentNode(parentNode){
-
-}
+BNode<K,V>::BNode(BNode<K,V> * parentNode):parentNode(parentNode){}
 
 template<class K, class V>
 void BNode<K,V>::insert(K key, V value){ //结点插入kv

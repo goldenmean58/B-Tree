@@ -20,10 +20,10 @@ private:
     BNode<K,V> *_root;
     int _M; //阶数
     int _size;
-    void _mergeNode(BNode<K,V>*); //合并结点
     void _reBalance(BNode<K,V> *leaf); //重新平衡且从叶子?结点向上到根
     void _splitNode(BNode<K,V>*); //分裂结点
     void _removeNode(BNode<K,V>*); //直接删除结点
+    void _removeTree(BNode<K,V>*); //删除子树
     bool insert(BNode<K,V>*,K,V); //插入
     bool insert(BNode<K,V>*,const KeyValue<K,V>); 
     void _printTree(BNode<K,V>*);
